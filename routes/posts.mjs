@@ -131,8 +131,14 @@ router.put('/posts/:postId', async (req, res) => {
             title, text, postId
         ]);
 
+        if (updateResponse) {
+            return res.status(404).send({
+                message: "post not found"
+            })
+        }
+
         res.send({
-            message: `post updaed successfully with id: ${postId}`
+            message: `post updated successfully with id: ${postId}`
         })
 
     } catch (error) {
@@ -145,11 +151,31 @@ router.put('/posts/:postId', async (req, res) => {
 
 })
 
-router.delete('/posts', (req, res) => {
+router.delete('/posts/:postId', async (req, res) => {
+
+    const { postId } = req?.params
+
+    if (!postId) {
+        return res.status(400).send({
+            message: "postId is required"
+        })
+    }
 
     try {
 
+        const deleteResponse = await db.query(`DELETE FROM posts_table WHERE id = ?`, [
+            postId
+        ]);
 
+        if (deleteResponse) {
+            return res.status(404).send({
+                message: "post not found"
+            })
+        }
+
+        res.send({
+            message: `post deleted successfully with id: ${postId}`
+        })
 
     } catch (error) {
         console.error(error)
