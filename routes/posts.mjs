@@ -8,7 +8,7 @@ router.get('/posts', async (req, res) => {
 
     try {
 
-        const posts = await db.query('SELECT * FROM posts_table ORDER BY created_on DESC')
+        const posts = await db.query('SELECT * FROM posts_table ORDER BY id DESC')
 
         if (!posts) {
             return res.status(404).send({
@@ -82,8 +82,6 @@ router.post('/posts', async (req, res) => {
         })
     }
 
-    console.log(moment(new Date()).format('YYYY-MM-DD'))
-
     try {
 
         const insertResponse = await db.query('INSERT INTO posts_table (title, text, created_on) VALUES (? , ? , ?)', [
@@ -92,6 +90,49 @@ router.post('/posts', async (req, res) => {
 
         res.send({
             message: `post added successfully with id: ${insertResponse[0]?.insertId}`
+        })
+
+    } catch (error) {
+        console.error(error)
+        res.status(500).send({
+            message: "internal server error",
+            error: error?.message
+        })
+    }
+
+})
+
+router.put('/posts/:postId', async (req, res) => {
+
+    const { postId } = req?.params
+    const { title, text } = req?.body
+
+    if (!postId) {
+        return res.status(400).send({
+            message: "postId is required"
+        })
+    }
+
+    if (!title || title?.trim() === "") {
+        return res.status(400).send({
+            message: "title is required"
+        })
+    }
+
+    if (!text || text?.trim() === "") {
+        return res.status(400).send({
+            message: "text is required"
+        })
+    }
+
+    try {
+
+        const updateResponse = await db.query(`UPDATE posts_table SET title = ?, text = ? WHERE id = ?`, [
+            title, text, postId
+        ]);
+
+        res.send({
+            message: `post updaed successfully with id: ${postId}`
         })
 
     } catch (error) {
