@@ -16,3 +16,5 @@ export const connect_db = () => {
             console.error(err)
         })
 }
+
+export default mySqlPool
